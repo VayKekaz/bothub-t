@@ -38,9 +38,7 @@ export class BookController {
     @MustHaveRole('admin')
     @HttpCode(201)
     async create(@Body() body: unknown) {
-        console.log('raw   :', body);
         const book = CreateBookSchema.parse(body);
-        console.log('parsed:', book);
         const created = await this.db.insert(Books).values(book).returning();
         return created[0];
     }
