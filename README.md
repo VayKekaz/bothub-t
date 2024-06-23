@@ -34,3 +34,7 @@ yarn run test
 ### Usage
 
 Openapi is located under `/docs` path. `http://localhost:3000/docs` by default.
+
+Notable endpoints:
+
+- `/test/create-admin` - creates test admin

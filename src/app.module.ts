@@ -5,6 +5,7 @@ import { DbModule } from './db/db.module';
 import { EmailModule } from './email/email.module';
 import { UserModule } from './user/user.module';
 import { BookModule } from './book/book.module';
+import { TestModule } from './test/test.module';
 
 
 @Module({
@@ -19,6 +20,8 @@ import { BookModule } from './book/book.module';
         CryptoModule,
 
         BookModule,
+
+        TestModule,
     ],
 })
 export class AppModule {
