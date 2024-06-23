@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Logger, NotFoundException, Param, Post, Put } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -13,6 +13,8 @@ const CreateBookSchema = createInsertSchema(Books, {
 
 @Controller('books')
 export class BookController {
+    private readonly logger = new Logger(this.constructor.name);
+
     constructor(
         @InjectDb private readonly db: Database,
         // no service due to simple logic
@@ -40,6 +42,7 @@ export class BookController {
     async create(@Body() body: unknown) {
         const book = CreateBookSchema.parse(body);
         const created = await this.db.insert(Books).values(book).returning();
+        this.logger.verbose(`Created Book(id=${created[0].id}, name='${created[0].title}')`);
         return created[0];
     }
 
@@ -49,6 +52,7 @@ export class BookController {
     async update(@Param('id') id: Book['id'], @Body() body: unknown) {
         const book = CreateBookSchema.parse(body);
         const updated = await this.db.update(Books).set(book).where(eq(Books.id, id)).returning();
+        this.logger.verbose(`Updated Book(id=${id})`);
         return updated[0];
     }
 
@@ -57,5 +61,6 @@ export class BookController {
     @HttpCode(204)
     async delete(@Param('id') id: Book['id']) {
         await this.db.delete(Books).where(eq(Books.id, id));
+        this.logger.verbose(`Deleted Book(id=${id})`);
     }
 }

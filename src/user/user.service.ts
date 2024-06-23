@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { count, eq, getTableColumns } from 'drizzle-orm';
 import { CryptoService } from '../crypto/crypto.service';
 import { Database, InjectDb } from '../db/db.module';
@@ -8,6 +8,8 @@ import { User, UserRole, Users } from './user.model';
 
 @Injectable()
 export class UserService {
+    private readonly logger = new Logger(this.constructor.name);
+
     constructor(
         @InjectDb private readonly db: Database,
         private readonly email: EmailService,
@@ -48,6 +50,7 @@ export class UserService {
     async create(user: typeof Users.$inferInsert): Promise<User> {
         user.password = await this.crypto.hash(user.password);
         const res = await this.db.insert(Users).values(user).returning();
+        this.logger.verbose(`Created User(id=${res[0].id}, name='${res[0].name}')`);
         return res[0];
     }
 
@@ -57,5 +60,6 @@ export class UserService {
         if (!exists)
             throw new NotFoundException(`User with id=${id} not found.`);
         await this.db.update(Users).set({ role: role }).where(where);
+        this.logger.verbose(`User(id=${id}) has been assigned as ${role}`);
     }
 }
