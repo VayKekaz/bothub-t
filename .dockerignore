@@ -1,0 +1,9 @@
+.env*
+.gitignore
+dist
+.yarn
+node_modules
+.idea
+compose.yml
+*Dockerfile*
+test

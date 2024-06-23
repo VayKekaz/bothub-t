@@ -1,8 +1,35 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    env_file: .env
+    environment:
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
+    env_file: .env
+    environment:
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+    depends_on:
+      database:
+        condition: service_healthy
+
   database:
     image: postgres:16
-    env_file:
-      - .env
+    env_file: .env
     environment:
       POSTGRES_USER: ${DATABASE_USER:?}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?}
@@ -10,8 +37,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready", "-d", "$DATABASE_DB" ]
-      interval: 30s
+      test: [ "CMD-SHELL", "pg_isready", "-d", "$DATABASE_DB", "-U", "$DATABASE_USER" ]
+      interval: 10s
       timeout: 60s
       retries: 5
-      start_period: 80s
